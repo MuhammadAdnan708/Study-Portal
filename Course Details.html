@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Details & Discussion Forum</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="./css/stylefordeatil.css">
+
+</head>
+
+<body>
+    <div id="detailsApp">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo-container" @click="goToIndexPage">
+                <img src="./images/home.png" alt="Logo">
+                <span class="tooltip-text">Return to portal</span>
+            </div>
+            <div class="teach-mgm" @click="goToIndexPage">
+                <img src="./images/Teaching mgm.png" class="sidebar-icon logo" alt="Teaching Management">
+                <span class="teaching-management-text">Teaching Management</span>
+            </div>
+            <div class="download-icon">
+                <img src="./images/download.png" class="sidebar-icon" alt="Download">
+            </div>
+            <div class="show-profile-info">
+                <img src="./images/profile.jpg" class="profile-img" alt="Profile Picture">
+                <span class="p-info">
+                    <p>Hello, M.Adnan</p>
+                    <div class="R-P"><a href="#" class="dropdown-link" style="color: blue;">Reset Password</a></div>
+                    <div class="LG"><a href="./home.html" class="dropdown-link" style="color: red;">Logout</a></div>
+                </span>
+            </div>
+        </div>
+        <div class="header">
+            <!-- Course Details -->
+            <div class="header-content">
+                <div>
+                    <div class="title">
+                        <h1>{{ course.title }}</h1>
+                    </div>
+                    <div class="course-description">
+                        <p class="teacher" >
+                            <i class="fas fa-user"></i> {{ course.teacher }}
+                        </p>
+                       
+                            
+                            <p class="description">
+                                <i class="fas fa-home"></i> {{ course.description }}
+                            </p>
+                       
+                        <p class="time" >
+                            <i class="fas fa-calendar-alt"></i> {{ course.Course_start_time }}
+                        </p>
+                    </div>
+                </div>
+
+
+
+                <div class="header-right"></div>
+
+            </div>
+
+            <!-- Tabs -->
+            <div class="tab-menu">
+                <div :class="{active: activeTab === 'learn'}" @click="activeTab = 'learn'">What you will learn</div>
+                <div :class="{active: activeTab === 'discussion'}" @click="activeTab = 'discussion'">Discussion Forum
+                </div>
+                <div :class="{active: activeTab === 'announcement'}" @click="activeTab = 'announcement'">Announcement
+                </div>
+                <div :class="{active: activeTab === 'transcript'}" @click="activeTab = 'transcript'">Transcript</div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="details-container">
+
+            <!-- Tab Content -->
+            <div class="tab-content">
+                <!-- What you will learn -->
+                <div class="study-portal" v-if="activeTab === 'learn'">
+
+                    <img src="./images/studyportal.png" alt="No Content">
+                    <p>The teacher did not publish the learning content</p>
+                </div>
+                <!-- Discussion Tab -->
+                <div :class="{'dis-msg': activeTab === 'discussion'}">
+                    <div v-if="activeTab === 'discussion'" class="discussion-forum">
+                        <div class="forum-header">
+                            <input type="text" placeholder="Search discussions" v-model="searchKeyword"
+                                class="search-bar" />
+                            <button @click="addDiscussionBox" class="start-discussion-btn">Start a Discussion</button>
+                        </div>
+
+
+                        <div class="forum-filters">
+                            <div class="filter">
+                                <select v-model="selectedFilter">
+                                    <option value="all">All posts</option>
+                                    <option value="myPosts">My posts</option>
+                                    <option value="teacherParticipation">Teacher Participation</option>
+                                    <option value="discussion">Discussion</option>
+                                    <option value="scorePosts">Score Posts</option>
+                                </select>
+                            </div>
+                            <div class="sort">
+                                <select v-model="sortOrder">
+                                    <option value="reverse">Reverse time</option>
+                                    <option value="recent">Time sequence</option>
+                                    <option value="mostCommented">Most Commented</option>
+                                    <option value="leastComments">Least Comments</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="forum-content">
+                            <div v-if="discussions.length === 0" class="no-discussion">
+                                <p>No discussions yet</p>
+                            </div>
+                            <div v-else>
+                                <ul>
+                                    <li v-for="(discussion, index) in sortedDiscussions" :key="index">
+                                        <h3>{{ discussion.title }}</h3>
+                                        <p>{{ discussion.content }}</p>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+                <div class="discussion-form-container" v-if="activeTab === 'discussion' && showDiscussionForm">
+                    <div class="discussion-form">
+                        <!-- Title input -->
+
+                        <div class="discussion-title" contenteditable="true" ref="discussionTitle"
+                            :class="{ 'has-content': newDiscussionTitle.trim().length > 0 }" @input="updateTitle"
+                            data-placeholder="Please enter a discussion title">
+                        </div>
+
+
+                        <!-- Toolbar -->
+                        <hr class="top">
+                        <div class="icons">
+                            <i class="fa fa-undo" title="Undo" @click="undoAction"></i>
+                            <i class="fa fa-redo" title="Redo" @click="redoAction"></i>
+                            <button @click="execCommand('bold')"><i class="fa fa-bold"> </i></button>
+                            <button @click="execCommand('italic')"> <i class="fa fa-italic"></i></button>
+                            <button @click="execCommand('underline')"><i class="fa fa-underline"></i></button>
+                            <button @click="execCommand('strikeThrough')"><i class="fa fa-strikethrough"></i></button>
+                            <button @click="execCommand('insertUnorderedList')"><i class="fa fa-list-ul"></i></button>
+                            <button @click="execCommand('insertOrderedList')"><i class="fa fa-list-ol"></i></button>
+                            <button @click="execCommand('justifyLeft')"><i class="fa fa-align-left"></i></button>
+                            <button @click="execCommand('justifyCenter')"><i class="fa fa-align-center"></i></button>
+                            <button @click="execCommand('justifyRight')"><i class="fa fa-align-right"></i></button>
+                            <button @click="execCommand('justifyFull')" style="display:none;"><i
+                                    class="fa fa-align-justify"></i></button> <!-- Not widely supported -->
+                            <button @click="execCommand('insertLink', 'https://')"><i class="fa fa-link"></i></button>
+                            <button @click="execCommand('insertImage', 'https://')"><i class="fa fa-image"></i></button>
+
+                        </div>
+                        <hr class="bottom">
+                        <!-- Content input -->
+                        <div class="content-box" contenteditable="true" ref="contentBox"
+                            :class="{ 'has-content': newDiscussionContent.trim().length > 0 }" @input="updateContent"
+                            placeholder="Please enter a discussion content"></div>
+
+
+                        <hr>
+                        <!-- File attachment -->
+                        <div class="file-attachment">
+                            <label for="file-upload" class="file-label">
+                                <i class="fas fa-paperclip"></i> Attach a file:
+                            </label>
+                            <input type="file" id="file-upload" class="file-input" @change="handleFileUpload"
+                                multiple />
+
+                            <!-- Info Icon with Tooltip -->
+                            <div class="fileupload-container">
+                                <i class="fas fa-info-circle fileupload-icon"></i>
+                                <div class="fileupload-content">
+                                    Up to 5 attachments can be uploaded, with each file not exceeding 30 MB, and the
+                                    total cannot exceed 100 MB.<br>
+                                    File types: .pdf, .doc, .docx, .xls, .xlsx, .jpg, .png, .zip, etc.
+
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <hr>
+                        <!-- Buttons -->
+                        <div class="form-buttons">
+                            <button @click="submitForm" class="action-button">Release</button>
+                            <button @click="cancelForm" class="action-button cancel">Cancel</button>
+                        </div>
+                    </div>
+
+
+
+                </div>
+                <div class="music">
+                    <!-- Announcement -->
+                    <div v-if="activeTab === 'announcement'" class="announcement-box">
+                        <!-- Search Box Section -->
+                        <div class="search-box-container">
+                            <div class="search-box">
+                                <input type="text" placeholder="Please enter the announcement" class="search-input"
+                                    v-model="announcementSearch">
+                                <div class="icon-box">
+                                    <i class="fas fa-search search-icon" @click="searchAnnouncement"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="border-bottom"></div>
+                        <!-- Message Section -->
+                        <div class="announcement-message">
+                            <div v-if="filteredAnnouncements.length === 0">
+                                <p>No announcement yet</p>
+                            </div>
+                            <div v-else>
+                                <ul>
+                                    <li v-for="(announcement, index) in filteredAnnouncements" :key="index">
+                                        <h3>{{ announcement.title }}</h3>
+                                        <p>{{ announcement.content }}</p>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div v-if="activeTab === 'transcript'" class="transcript-section">
+
+
+                    <div class="container">
+                        <!-- Top Row -->
+                        <div class="top-row">
+                            <!-- Assessment Plan (Left Side) -->
+                            <div class="assessment-plan-box">
+                                <h3>Course Assessment Plan</h3>
+                                <p>Total 7 modules | Full score: 100 points</p>
+                                <div class="study-unit">
+                                    <ul>
+                                        <li v-for="(item, index) in assessmentPlan" :key="index">
+                                            <span>{{ item.name }} ({{ item.studyUnits }} study units)</span>
+                                            <span>{{ item.percentage }}%</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- Achievement Overview (Right Side) -->
+                            <div class="achievement-overview-box">
+
+                                <div class="circle">
+                                    <p class="ach-p">Achievement Overview</p>
+                                    <div class=".border"></div>
+                                    <div class="circle-score">
+                                        <p class="personal-score"><strong class="bold">0.0</strong> </p>
+                                        <h5 class="score-label">Personal score</h5>
+                                    </div>
+                                    <div class="score-details">
+                                        <div class="score-detail">
+                                            <div class="bold">
+                                                <strong>0.0</strong>
+                                            </div>
+                                            <p>Class average</p>
+
+                                        </div>
+                                        <div class="center"></div>
+                                        <div class="score-detail">
+                                            <div class="bold">
+                                                <strong>0.0</strong>
+                                            </div>
+                                            <p>Highest score in class</p>
+
+                                        </div>
+                                        <div class="center"></div>
+                                        <div class="score-detail">
+                                            <div class="bold">
+                                                <strong>0.0</strong>
+                                            </div>
+                                            <p>Lowest score in class</p>
+
+                                        </div>
+
+                                    </div>
+
+                                    <div class="learning-progress">
+                                        <h5 class="progress-text">
+                                            Video learning progress that counts towards assessment:
+                                            <span class="progress-percentage">0%</span>
+                                            <span class="info-icon" @mouseover="showTooltip = true"
+                                                @mouseleave="showTooltip = false">!</span>
+                                        </h5>
+                                        <div v-if="showTooltip" class="show-icon-tooltip">
+                                            This progress may affect your ability to take the exam.
+                                            <br>Please refer to the exam requirements for details.
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- No Learning Record (Integrated) -->
+
+                                <div class="no-record-section">
+                                    <p class="no-record-text">You have no learning records yet.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <table class="module-table">
+                        <thead>
+                            <tr>
+                                <th>Assessment Module</th>
+                                <th>Study Unit Title</th>
+                                <th>Chapter</th>
+                                <th>Study Time</th>
+                                <th>Completion</th>
+                                <th>Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div class="module-name">
+                                        <span class="dot"></span>
+                                        <b>Graphics</b>
+                                    </div>
+                                    <div class="module-info">0 units, total 10.000 points</div>
+                                </td>
+                                <td colspan="5" class="module-description">
+                                    The teacher has not published any teaching activities in this module
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="module-name">
+                                        <span class="dot"></span>
+                                        <b>Video</b>
+                                    </div>
+                                    <div class="module-info">0 units, total 20.000 points</div>
+                                </td>
+                                <td colspan="5" class="module-description">
+                                    The teacher has not published any teaching activities in this module
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="module-name">
+                                        <span class="dot"></span>
+                                        <b>Discuss</b>
+                                    </div>
+                                    <div class="module-info">0 units, total 5.000 points</div>
+                                </td>
+                                <td colspan="5" class="module-description">
+                                    The teacher has not published any teaching activities in this module
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="module-name">
+                                        <span class="dot"></span>
+                                        <b>Operation</b>
+                                    </div>
+                                    <div class="module-info">0 units, total 10.000 points</div>
+                                </td>
+                                <td colspan="5" class="module-description">
+                                    The teacher has not published any teaching activities in this module
+                                </td>
+                            <tr>
+                                <td>
+                                    <div class="module-name">
+                                        <span class="dot"></span>
+                                        <b>Rain Classroom Courseware
+                                        </b>
+                                    </div>
+                                    <div class="module-info">0 units, total 5.000 points</div>
+                                </td>
+
+                                <td colspan="5" class="module-description">
+                                    The teacher has not published any teaching activities in this module
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="module-name">
+                                        <span class="dot"></span>
+                                        <b>classroom</b>
+                                    </div>
+                                    <div class="module-info">0 units, total 20.000 points</div>
+                                </td>
+                                <td colspan="5" class="module-description">
+                                    The teacher has not published any teaching activities in this module
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="module-name">
+                                        <span class="dot"></span>
+                                        <b>take an exam</b>
+                                    </div>
+                                    <div class="module-info">0 units, total 10.000 points</div>
+                                </td>
+                                <td colspan="5" class="module-description">
+                                    The teacher has not published any teaching activities in this module
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.45/dist/vue.global.prod.js"></script>
+    <script>
+        const detailsApp = Vue.createApp({
+            data() {
+                return {
+                    course: null,
+                    activeTab: 'learn',
+                    searchKeyword: '', // For discussion search
+                    announcementSearch: '', // For announcement search input
+                    announcements: [], // Announcement data
+                    selectedFilter: 'all',
+                    showTooltip: false,
+                    sortOrder: 'reverse',
+                    discussions: [], // List of discussions
+                    showDiscussionForm: false, // Controls visibility of the discussion form
+                    newDiscussionTitle: '',
+                    newDiscussionContent: '',
+                    maxLength: 500, // Maximum character count for discussion conte
+                    assessmentPlan: [
+                        { name: 'Graphics', studyUnits: 0, percentage: 10 },
+                        { name: 'Video', studyUnits: 0, percentage: 20 },
+                        { name: 'Discuss', studyUnits: 0, percentage: 5 },
+                        { name: 'Operation', studyUnits: 0, percentage: 10 },
+                        { name: 'Rain Classroom Courseware', studyUnits: 0, percentage: 5 },
+                        { name: 'Classroom', studyUnits: 0, percentage: 20 },
+                        { name: 'Take an Exam', studyUnits: 0, percentage: 30 }
+                    ],
+                    achievementOverview: {
+                        personalScore: 0,
+                        classAverage: 0,
+                        highestScore: 0,
+                        lowestScore: 0,
+                        learningProgress: 0
+                    },
+                    additionalInfo: [
+                        { title: 'Section 1', description: 'Description of section 1' },
+                        { title: 'Section 2', description: 'Description of section 2' },
+                        { title: 'Section 3', description: 'Description of section 3' }
+                    ]
+                };
+            },
+            mounted() {
+                // Load course data from localStorage or redirect
+                const course = localStorage.getItem('selectedCourse');
+                if (course) {
+                    this.course = JSON.parse(course);
+                } else {
+                    this.goToIndexPage();
+                }
+
+                // Load discussions from localStorage
+                const savedDiscussions = localStorage.getItem('discussions');
+                if (savedDiscussions) {
+                    this.discussions = JSON.parse(savedDiscussions);
+                }
+
+                // Load announcements (mock data for now)
+                this.announcements = [
+                    { title: 'Exam Schedule', content: 'The exam will be held on 15th Jan.' },
+                    { title: 'New Lecture Uploaded', content: 'Lecture 5 is now available.' },
+                    { title: 'Assignment Reminder', content: 'Submit Assignment 2 by 10th Jan.' }
+                ];
+            },
+            computed: {
+                filteredDiscussions() {
+                    return this.discussions.filter(discussion =>
+                        discussion.title.toLowerCase().includes(this.searchKeyword.toLowerCase())
+                    );
+                },
+                sortedDiscussions() {
+    return [...this.filteredDiscussions];  // Returns the array in the same order it was added
+},
+                filteredAnnouncements() {
+                    return this.announcements.filter(announcement =>
+                        announcement.title.toLowerCase().includes(this.announcementSearch.toLowerCase())
+                    );
+                }
+            },
+            methods: {
+                goToIndexPage() {
+                    window.location.href = 'main.html';
+                },
+                handleFileUpload(event) {
+                    const selectedFiles = event.target.files;
+
+                    // Check if the number of selected files exceeds the limit
+                    if (selectedFiles.length > 5) {
+                        alert('You can upload a maximum of 5 files only!');
+                        event.target.value = ''; // Reset the input field
+                        return;
+                    }
+
+                    // Process the selected files
+                    this.selectedFiles = Array.from(selectedFiles); // Save files to a data property if needed
+                    console.log('Files uploaded:', this.selectedFiles);
+                },
+                switchTab(tabName) {
+                    this.activeTab = tabName;
+                },
+                applyHighlight() {
+                    // Prompt the user to select a color
+                    const color = prompt('Enter the highlight color (e.g., #FFFF00):');
+                    if (color) {
+                        // Apply the foreground color to the selected text
+                        this.execCommand('foreColor', color);
+                    }
+                },
+                focusContentEditable() {
+                    // Ensure the content box is focused
+                    this.$refs.contentBox.focus();
+                },
+
+                execCommand(command, arg = null) {
+                    const contentBox = this.$refs.contentBox;
+                    contentBox.focus(); // Ensure the content box is focused
+                    document.execCommand(command, false, arg);
+                },
+                focusContentEditable(elementRef) {
+                    this.$nextTick(() => {
+                        elementRef.focus();
+                    });
+                },
+                toggleFormat(command) {
+                    this.focusContentEditable(this.$refs.contentBox);
+                    document.execCommand(command, false, null);
+                },
+
+                updateContent() {
+                    this.newDiscussionContent = this.$refs.contentBox.innerText;
+                },
+                toggleFormat(command) {
+                    document.execCommand(command, false, null);
+                },
+                toggleBold() {
+                    this.toggleFormat('bold');
+                },
+                toggleItalic() {
+                    this.toggleFormat('italic');
+                },
+                toggleUnderline() {
+                    this.toggleFormat('underline');
+                },
+                toggleStrikethrough() {
+                    this.toggleFormat('strikeThrough');
+                },
+                toggleHighlight() {
+                    const color = prompt('Enter highlight color:');
+                    if (color) {
+                        this.toggleFormat('foreColor', color);
+                    }
+                },
+                toggleList(listType) {
+                    this.toggleFormat(listType === 'unordered' ? 'insertUnorderedList' : 'insertOrderedList');
+                },
+                changeAlignment(alignment) {
+                    this.toggleFormat(alignment === 'justify' ? 'justifyLeft' : alignment);
+                },
+                insertLink() {
+                    const url = prompt('Enter the link URL:');
+                    if (url) {
+                        document.execCommand('createLink', false, url);
+                    }
+                },
+                insertImage() {
+                    const imgSrc = prompt('Enter the image URL:');
+                    if (imgSrc) {
+                        document.execCommand('insertImage', false, imgSrc);
+                    }
+                },
+                undoAction() {
+                    document.execCommand('undo', false, null);
+                },
+                redoAction() {
+                    document.execCommand('redo', false, null);
+                },
+                applyFormat() {
+                    // This method can be expanded based on what 'format' means in your context
+                },
+                changeFont() {
+                    // Implement font change logic here
+                },
+                changeParagraphFormat() {
+                    const format = document.getElementById('paragraph-format').value;
+                    document.execCommand('formatBlock', false, format);
+                },
+                // Handle content change from the contenteditable div
+                updateContent(event) {
+                    this.newDiscussionContent = event.target.innerText; // Use innerText instead of innerHTML for plain text
+                },
+                updateTitle(event) {
+                    this.newDiscussionTitle = event.target.innerText.trim();
+                },
+                // Toggles the visibility of the form when the "Start a Discussion" button is clicked
+                addDiscussionBox() {
+                    this.showDiscussionForm = !this.showDiscussionForm;
+                },
+
+                // Handle form submission
+                submitForm() {
+                    if (this.newDiscussionTitle && this.newDiscussionContent) {
+                        // Add the new discussion to the list or save it
+                        const newDiscussion = {
+                            title: this.newDiscussionTitle,
+                            content: this.newDiscussionContent
+                        };
+                        this.discussions.push(newDiscussion);
+                        localStorage.setItem('discussions', JSON.stringify(this.discussions)); // Save discussions to localStorage
+                        this.showDiscussionForm = false; // Hide form after submission
+                        this.newDiscussionTitle = '';
+                        this.newDiscussionContent = '';
+                        alert('Discussion added successfully!');
+                    } else {
+                        alert('Both title and content are required!');
+                    }
+                },
+
+                // Cancel the form and reset fields
+                cancelForm() {
+                    this.showDiscussionForm = false;
+                    this.newDiscussionTitle = '';
+                    this.newDiscussionContent = '';
+                },
+
+                // Search announcements with validation
+                searchAnnouncement() {
+                    if (!this.announcementSearch || this.announcementSearch.trim() === '') {
+                        alert('Please fill in the search field!');
+                    } else if (this.filteredAnnouncements.length === 0) {
+                        alert('No announcement found!');
+                    }
+                }
+            }
+        });
+
+        detailsApp.mount('#detailsApp');
+    </script>
+
+
+
+</body>
+
+</html>

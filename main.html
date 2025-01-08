@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rain Class</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div id="app">
+        <div class="navbar">
+            <div class="left">
+                <p class="nv">My Courses</p>
+            </div>
+            <div class="right">
+                <a href="#" @click="openArchivesModal">My Archives</a>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <div class="logo-container">
+                <a href="./home.html"> <img src="./images/home.png" alt="Logo"></a> 
+                <span class="tooltip-text">Return to portal</span>
+            </div>
+            <div class="teach-mgm">
+                <img src="./images/Teaching mgm.png" class="sidebar-icon logo" alt="Teaching Management">
+                <span class="teaching-management-text">Teaching Management</span>
+            </div>
+            <div class="download-icon">
+                <img src="./images/download.png" class="sidebar-icon" alt="download">
+            </div>
+            <div class="show-profile-info">
+                <img src="./images/profile.jpg" class="profile-img" alt="Profile Picture">
+                <span class="p-info">
+                    <p>Hello, M.Adnan</p>
+                    <div class="R-P">
+                        <a href="#" class="dropdown-link" style="color: blue;">Reset Password</a>
+                    </div>
+                    <div class="LG">
+                        <a href="./main.html" class="dropdown-link" style="color: red;">Logout</a>
+                    </div>
+                </span>
+            </div>
+        </div>
+
+        <div class="main">
+            <div>
+                <div class="search-box">
+                    <i class="fa fa-search fa-sm"></i>
+                    <input type="text" v-model="searchQuery" placeholder="Search Courses">
+                    <i class="fa fa-times clear-icon" v-if="searchQuery" @click="clearSearch"></i>
+                </div>
+                <div class="no-results" v-if="filteredCourses.length === 0">
+                    No results found.
+                </div>
+
+                <div class="card-container">
+                    <div class="card" v-for="course in filteredCourses" :key="course.id" @click="goToDetails(course)">
+                        <div class="card-title" >{{ course.title }}</div>
+                        <div class="tooltip-container">
+                            <div class="card-options" @click.stop>...</div>
+                            <div class="archives" @click.stop>
+                                <p class="bg"  @click.stop="showArchivePrompt(course)">Archive</p>
+                            </div>
+                        </div>
+                        <div class="card-description">
+                            <i class="fa fa-home"></i> {{ course.description }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="showArchivesModal" class="modal my-archives-modal show" @click.self="closeArchivesModal">
+                <div class="my-archives-modal-content">
+                    <div class="my-archives-top">
+                        <strong>My Archives</strong>
+                        <p>(The system automatically archives the history semester teaching classes. Archived classes cannot send teaching activities.)</p>
+                        <p class="closeArchivesModal" @click="closeArchivesModal">Cancel</p>
+                    </div>
+                    <hr>
+                    <div>
+                        <div>
+                            <button @click="activeTab = 'teach'" :class="{ active: activeTab === 'teach' }">
+                                Classes I Teach ({{ archivedCourses.length }})
+                            </button>
+                            <button @click="activeTab = 'myClasses'" :class="{ active: activeTab === 'myClasses' }">
+                                My Classes ({{ myClasses.length }})
+                            </button>
+                        </div>
+                        <hr>
+
+                        <div v-if="activeTab === 'teach'">
+                            <div v-if="archivedCourses.length === 0">No archived courses.</div>
+                            <div v-for="course in archivedCourses" :key="course.id" class="archived-course">
+                                <div class="card-titles">{{ course.title }}</div>
+                                <div class="card-descriptions">
+                                    <i class="fa fa-home"></i> {{ course.description }}
+                                    <button class="unarchive-btn" @click="unarchiveCourse(course)">Remove</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-if="activeTab === 'myClasses'">
+                            <div v-if="myClasses.length === 0">No classes found.</div>
+                            <div class="archived-courses-container" v-else>
+                                <div v-for="course in myClasses" :key="course.id" class="archived-course">
+                                    <div class="card-box">
+                                        <div class="card-titles">{{ course.title }}</div>
+                                        <div class="card-descriptions">
+                                            <i class="fa fa-home"></i> {{ course.description }}
+                                            <p class="unarchive-btn" @click="unarchiveCourse(course)">Remove</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="showPrompt" class="modal archive-prompt-modal show" @click.self="closePrompt">
+                <div class="modal-content">
+                    <h3>Are you sure you want to archive this course?</h3>
+                    <input type="checkbox" v-model="dontRemindAgain">
+                    <label>Don't remind me again</label>
+                    <div class="border-bottom"></div>
+                    <button class="btn-left" @click="confirmArchive(true)">Confirm</button>
+                    <button @click="confirmArchive(false)">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.45/dist/vue.global.js"></script>
+    <script>
+        const app = Vue.createApp({
+            data() {
+                return {
+                    searchQuery: '',
+                    courses: [
+                        { id: 1, title: 'Operating Systems', description: ' 2024 Fall - Class 3-9 (Shenzhen information Technology - Pakistan)', teacher: "Muhammad Sadiq", Course_start_time: "2024-09-01 to 2025-01-31 " },
+                        { id: 2, title: 'Graphic Design', description: '2024 Fall - Class 3-9 (Shenzhen information Technology - Pakistan)', teacher: "Lu Yuming", Course_start_time: "2024-09-01 to 2025-01-31 " },
+                        { id: 3, title: 'Project Training 2', description: '2024 Fall - Class 3-9 (Shenzhen information Technology - Pakistan)', teacher: "Xiao Xiong", Course_start_time: "2024-09-01 to 2025-01-31 " },
+                        { id: 4, title: 'Advanced HTML5 Development', description: '2024 Fall - Class 3-9 (Shenzhen information Technology - Pakistan)', teacher: "Xiong Yingna", Course_start_time: "2024-09-01 to 2025-01-31 " },
+                        { id: 5, title: 'Machine Learning Applications', description: '2024 Fall - Class 3-9 (Shenzhen information Technology - Pakistan)', teacher: "Geng Yu", Course_start_time: "2024-09-01 to 2025-01-31 " },
+                        { id: 6, title: 'Advanced Android Development', description: '2024 Fall - Class 3-9 (Shenzhen information Technology - Pakistan)', teacher: "Li Qin", Course_start_time: "2024-09-01 to 2025-01-31 " },
+                        { id: 7, title: 'China ICT Technologies & Industry', description: '2024 Fall - Class 3-9 (Shenzhen information Technology - Pakistan)', teacher: "Yu Yuan", Course_start_time: "2024-09-01 to 2025-01-31 " },
+                        { id: 8, title: 'Advanced Java Development', description: '2024 Fall - Class 3-9 (Shenzhen information Technology - Pakistan)', teacher: "Huang Weipang", Course_start_time: "2024-09-01 to 2025-01-31 " },
+                        { id: 9, title: 'Situation and Policy IV', description: '2024 Fall - Class 3-9 (Shenzhen information Technology - Pakistan)', teacher: "Xiao Zan", Course_start_time: "2024-09-01 to 2025-01-31 " }
+                    ],
+                    archivedCourses: [],
+                    showPrompt: false,
+                    showArchivesModal: false,
+                    currentCourse: null,
+                    myClasses: [],
+                    activeTab: 'teach',
+                    dontRemindAgain: false,
+                };
+            },
+            computed: {
+                filteredCourses() {
+                    return this.courses.filter(course =>
+                        !this.isCourseArchived(course) && course.title.toLowerCase().includes(this.searchQuery.toLowerCase())
+                    );
+                }
+            },
+            methods: {
+                clearSearch() {
+                    this.searchQuery = '';
+                },
+                goToDetails(course) {
+                    localStorage.setItem('selectedCourse', JSON.stringify(course));
+                    window.location.href = 'Course Details.html';
+                },
+                showArchivePrompt(course) {
+                    this.currentCourse = course;
+                    if (localStorage.getItem('dontRemindAgain') === 'true') {
+                        this.confirmArchive(true);
+                    } else {
+                        this.showPrompt = true;
+                    }
+                },
+                closePrompt() {
+                    this.showPrompt = false;
+                },
+                confirmArchive(confirm) {
+                    if (confirm && this.currentCourse) {
+                        const exists = this.myClasses.some(course => course.id === this.currentCourse.id);
+                        if (!exists) {
+                            this.myClasses.push(this.currentCourse);
+                            this.courses = this.courses.filter(course => course.id !== this.currentCourse.id);
+                            localStorage.setItem('archivedCourses', JSON.stringify(this.myClasses));
+                        }
+                    }
+                    if (this.dontRemindAgain) {
+                        localStorage.setItem('dontRemindAgain', 'true');
+                    }
+                    this.showPrompt = false;
+                },
+                openArchivesModal() {
+                    this.showArchivesModal = true;
+                },
+                closeArchivesModal() {
+                    this.showArchivesModal = false;
+                },
+                unarchiveCourse(course) {
+                    this.myClasses = this.myClasses.filter(archived => archived.id !== course.id);
+                    if (!this.courses.some(existing => existing.id === course.id)) {
+                        this.courses.push(course);
+                    }
+                    localStorage.setItem('archivedCourses', JSON.stringify(this.myClasses));
+                },
+                loadArchivedCourses() {
+                    const archivedCourses = JSON.parse(localStorage.getItem('archivedCourses'));
+                    if (archivedCourses) {
+                        this.myClasses = archivedCourses;
+                    }
+                },
+                isCourseArchived(course) {
+                    return this.myClasses.some(archived => archived.id === course.id);
+                }
+            },
+            mounted() {
+                this.loadArchivedCourses();
+                localStorage.removeItem('dontRemindAgain');
+            }
+        });
+
+        app.mount('#app');
+    </script>
+    
+</body>
+
+</html>

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./css/home.css">
+    <title>HomePage</title>
+
+    <script src="https://unpkg.com/vue@3"></script>
+</head>
+
+<body>
+    <div id="app">
+
+
+        <!-- Header Section -->
+        <header>
+            <div class="main-logo">
+                <a href="#"> <img src="./images/main-logo.png" alt="Logo"> </a>
+            </div>
+            <nav class="nav-links">
+                <a href="#" class="active">Home</a>
+                <a href="./all-courses.html" class="all-courses">All Courses</a>
+                <div class="search-bar">
+                    <input type="text" placeholder="Search Courses" label="search">
+                    <img src="./images/search-svgrepo-com.svg" alt="search">
+                </div>
+                <div class="for-the-app">
+                    <p class="for-app">Download App</p>
+                    <div class="qr-code">
+                        <img src="./images/qrCODE.png" alt="APP">
+                        <p>Download the Student App</p>
+                    </div>
+                </div>
+                <a href="#" class="move-to-workspace" @click="openPopup">
+
+                    <span v-else>Learning Space</span>
+                </a>
+                <img src="./images/profile.jpg" alt="Profile Pic" class="profile-pic">
+                <a href="./main.html" class="move-to-workspace">
+                    <span v-else>Study space</span>
+                </a>
+            </nav>
+        </header>
+
+        <!-- Main Content Section -->
+        <div class="main-content">
+            <img src="./images/main-page.png" alt="Building Image">
+        </div>
+
+        <!-- Announcements Section -->
+        <div class="message-section-width">
+            <div class="message-section">
+                <div class="announcement">
+                    <h5>Announcement</h5>
+                    <p>No announcements at the moment!</p>
+                </div>
+                <div class="notify">
+                    <h5>Notification</h5>
+                    <p>No notifications at the moment!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Popup Section -->
+        <div v-if="isPopupVisible" class="popup-overlay">
+            <div class="popup">
+                <div class="popup-header">
+                    <button class="close-button" @click="closePopup">X</button>
+                </div>
+                <div class="popup-content">
+                    <div class="popup-left">
+                        <img src="./images/popup-image.png" alt="Illustration" />
+                    </div>
+                    <div class="popup-right">
+                        <h3>Scan QR Code to Login</h3>
+                        <div class="qr-code-container">
+                            <img src="./images/qrCODE.png" alt="QR Code" />
+                        </div>
+                        <p class="qr-instructions">You need to follow the Yuke Classroom service account first</p>
+                        <p class="terms">
+                            By logging in, you agree to the
+                            <a href="#" class="terms-link">User Agreement</a> and
+                            <a href="#" class="privacy-link">Privacy Policy</a>.
+                        </p>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <footer class="footer">
+            <div class="footer-container">
+                <h3>Shenzhen Institute of Information Technology</h3>
+                <p class="subtext">Platform Service and Technical Support</p>
+                <div class="contact-info">
+                    <div class="info-item">
+                        <div class="icon-circle">
+                            <img src="./images/call.svg" alt="Phone Icon" />
+                        </div>
+                        <div class="info-text">
+                            <p class="title">CALL</p>
+                            <p>400-689-1199</p>
+                            <p>010-8215-2530</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="icon-circle">
+                            <img src="./images/mail.svg" alt="Mail Icon" />
+                        </div>
+                        <div class="info-text">
+                            <p class="title">MAIL</p>
+                            <p>bsupport@xuetangx.com</p>
+                            <p>creditcourse@xuetangx.com</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="icon-circle">
+                            <img src="./images/clock.svg" alt="Clock Icon" />
+                        </div>
+                        <div class="info-text">
+                            <p class="title">WORK TIME</p>
+                            <p>Weekdays</p>
+                            <p>9:00-18:00</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="border"></div>
+                <div class="footer-bottom">
+                    <p>Copyright 2013-2024 Beijing ICP Certificate No. 14019655 | &nbsp;
+                        <img src="./images/mini.png" alt="">
+                        &nbsp;Beijing Public Security Certificate No. 11010802033052 | Beijing Muhua Information
+                        Technology Co., Ltd.
+                    </p>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+    <script>
+        const HomePage = {
+
+            data() {
+                return {
+                    isPopupVisible: false,
+                    user: {
+                        profilePicture: null, 
+                    },
+                    "success": true,
+                    "profilePicture": "https://example.com/user-profile.jpg"
+                };
+            },
+            methods: {
+                openPopup() {
+                    this.isPopupVisible = true;
+                },
+                closePopup() {
+                    this.isPopupVisible = false;
+                },
+               
+                
+            },
+        };
+
+        
+        Vue.createApp(HomePage).mount('#app');
+    </script>
+
+</body>
+
+</html>

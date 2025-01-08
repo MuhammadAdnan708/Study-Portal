@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Courses</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14"></script>
+    <link rel="stylesheet" href="./css/all-courses.css">
+
+</head>
+
+<body>
+    <!-- Wrapper for entire page -->
+    <div id="app">
+        <!-- Header Section -->
+        <header>
+            <div class="main-logo">
+                <a href="#"> <img src="./images/main-logo.png" alt="Logo"> </a>
+            </div>
+            <nav class="nav-links">
+                <a href="home.html" class="active">Home</a>
+                <a href="all-courses.html" class="all-courses">All Courses</a>
+                <div class="search-bar">
+                    <input type="text" v-model="searchQuery" placeholder="Search Courses" @input="searchCourses">
+                    <img src="./images/search-svgrepo-com.svg" alt="search">
+                </div>
+                <div class="for-the-app">
+                    <p class="for-app">Download App</p>
+                    <div class="qr-code">
+                        <img src="./images/qrCODE.png" alt="App">
+                        <p>Download the Student App</p>
+                    </div>
+                </div>
+                <!-- Fixed Button -->
+                <a href="#" class="move-to-workspace" @click.prevent="openPopup">Learning Space</a>
+                <img src="./images/profile.jpg" alt="Profile Pic" class="profile-pic">
+                <a href="./main.html" class="move-to-workspace">
+                    Study space
+                </a>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <div class="course-selection">
+            <div class="heading">
+                <h3>Course Filters</h3>
+            </div>
+            <div class="course-filters">
+                <!-- Semester Section -->
+                <div class="filter-group">
+                    <div class="filter-heading">
+                        <p>Course Semester:</p>
+                    </div>
+                    <div class="filter-options">
+                        <span :class="{ active: selectedSemester === 'All' }" @click="selectSemester('All')">All</span>
+
+                        <span :class="{ active: selectedSemester === '2024-2025 Academic Year Second Semester' }"
+                            @click="selectSemester('2024-2025 Academic Year Second Semester')">2024-2025 Academic Year
+                            Second Semester</span>
+                        <span :class="{ active: selectedSemester === '2024-2025 Academic Year First Semester' }"
+                            @click="selectSemester('2024-2025 Academic Year First Semester')">2024-2025 Academic Year
+                            First Semester</span>
+                        <span :class="{ active: selectedSemester === '2023-2024 Academic Year Second Semester' }"
+                            @click="selectSemester('2023-2024 Academic Year Second Semester')">2023-2024 Academic Year
+                            Second Semester</span>
+                        <span :class="{ active: selectedSemester === '2023-2024 Academic Year First Semester' }"
+                            @click="selectSemester('2023-2024 Academic Year First Semester')">2023-2024 Academic Year
+                            First Semester</span>
+                        <span :class="{ active: selectedSemester === '2022-2023 Academic Year Second Semester' }"
+                            @click="selectSemester('2022-2023 Academic Year Second Semester')">2022-2023 Academic Year
+                            Second Semester</span>
+                        <span :class="{ active: selectedSemester === '2022-2023 Academic Year First Semester' }"
+                            @click="selectSemester('2022-2023 Academic Year First Semester')">2022-2023 Academic Year
+                            First Semester</span>
+                        <span :class="{ active: selectedSemester === '2021-2022 Academic Year Second Semester' }"
+                            @click="selectSemester('2021-2022 Academic Year Second Semester')">2021-2022 Academic Year
+                            Second Semester</span>
+                        <span :class="{ active: selectedSemester === '2021-2022 Academic Year First Semester' }"
+                            @click="selectSemester('2021-2022 Academic Year First Semester')">2021-2022 Academic Year
+                            First Semester</span>
+                        <span :class="{ active: selectedSemester === '2020-2021 Academic Year Second Semester' }"
+                            @click="selectSemester('2020-2021 Academic Year Second Semester')">2020-2021 Academic Year
+                            Second Semester</span>
+                        <span :class="{ active: selectedSemester === '2020-2021 Academic Year First Semeser' }"
+                            @click="selectSemester('2020-2021 Academic Year First Semester')">2020-2021 Academic Year
+                            First Semester</span>
+                        <span :class="{ active: selectedSemester === '2019-2020 Academic Year Second Semester' }"
+                            @click="selectSemester('2019-2020 Academic Year Second Semester')">2019-2020 Academic Year
+                            Second Semester</span>
+                        <span :class="{ active: selectedSemester === '2019-2020 Academic Year First Semester' }"
+                            @click="selectSemester('2019-2020 Academic Year First Semester')">2019-2020 Academic Year
+                            First Semester</span>
+                    </div>
+                </div>
+                <!-- Exam Mode Section -->
+                <div class="filter-group">
+                    <div class="filter-heading">
+                        <p>Course Category:</p>
+                    </div>
+                    <div class="filter-options">
+                        <span :class="{ active: selectedSemester === 'All' }" @click="selectSemester('All')">All</span>
+                    </div>
+                </div>
+
+                <!-- Credit Hours Section -->
+                <div class="filter-group">
+                    <div class="filter-heading">
+                        <p>Course Status:</p>
+                    </div>
+                    <div class="filter-options">
+                        <span :class="{ active: selectedStatus === 'All' }" @click="selectStatus('All')">All</span>
+                        <span :class="{ active: selectedStatus === 'Upcoming' }"
+                            @click="selectStatus('Upcoming')">Upcoming</span>
+                        <span :class="{ active: selectedStatus === 'Current' }"
+                            @click="selectStatus('Current')">Current</span>
+                        <span :class="{ active: selectedStatus === 'Archived' }"
+                            @click="selectStatus('Archived')">Archived</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="course-list">
+            <div class="course-list-heading">
+                <p>Number of Courses: {{ filteredCourses.length }}</p>
+            </div>
+            <div v-if="filteredCourses.length === 0" class="no-results">
+                <p>There are no results for what you are looking for. Please try another search!</p>
+            </div>
+
+            <div v-for="course in paginatedCourses " :key="course.id" class="course-card">
+                <img :src="course.image" :alt="course.title">
+                <div class="course-info">
+                    <div class="ad">
+                        <h3>{{ course.title }}</h3>
+                    </div>
+                    <div class="course-details">
+                        <a href="#" class="course-link">
+                            <img :src="course.teacherImage" alt="Teacher" class="teacher-image">
+                            <span>{{ course.teacherName }}</span>
+                            <img src="./Courses-images/eye.svg" alt="Views" class="icon">
+                            <span>Views: {{ course.views }}</span>
+                            <img src="./Courses-images/person.svg" alt="Enrolled" class="icon">
+                            <span>Enrolled: {{ course.enrolled }}</span>
+                            <img src="./Courses-images/clock.svg" alt="Hours" class="icon">
+                            <span>Hours: {{ course.hours }}</span>
+                            <img src="./Courses-images/graduate.svg" alt="Graduated" class="icon">
+                            <span>Credit: {{ course.credits }}</span>
+                        </a>
+                    </div>
+                    <div class="as">
+                        <p>{{ course.description }}</p>
+                    </div>
+
+                </div>
+                <div class="hover-bar"><img src="./images/right-arrow.svg" alt="right-arrow"></div>
+            </div>
+        </div>
+        <div class="pagination">
+            <!-- Left Arrow Button -->
+            <a @click="goToPreviousPage" :class="{ disabled: currentPage === 1 }">&#8592;</a>
+
+            <!-- Page Numbers -->
+            <a v-for="page in totalPages" :key="page" @click="goToPage(page)" :class="{ active: currentPage === page }">
+                {{ page }}
+            </a>
+
+            <!-- Right Arrow Button -->
+            <a @click="goToNextPage" :class="{ disabled: currentPage === totalPages }">&#8594;</a>
+        </div>
+
+        <!-- Popup Modal -->
+        <div class="popup-overlay" v-bind:class="{ visible: isPopupVisible }" @click="closePopup">
+
+            <div class="popup" @click.stop>
+                <div class="popup-header">
+                    <button class="close-button" @click="closePopup">×</button>
+                </div>
+                <div class="popup-content">
+                    <div class="popup-left">
+                        <img src="images/popup-image.png" alt="course image">
+                    </div>
+                    <div class="popup-right">
+                        <h3>Course Details</h3>
+                        <div class="qr-code-container">
+                            <img src="images/qrCode.png" alt="QR code">
+                        </div>
+                        <p class="qr-instructions">Scan to download the Student App and start learning!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- fotter section -->
+        <footer>
+            <footer class="footer">
+                <div class="footer-container">
+                    <h3>Shenzhen Institute of Information Technology</h3>
+                    <p class="subtext">Platform Service and Technical Support</p>
+                    <div class="contact-info">
+                        <div class="info-item">
+                            <div class="icon-circle">
+                                <img src="./images/call.svg" alt="Phone Icon" />
+                            </div>
+                            <div class="info-text">
+                                <p class="title">CALL</p>
+                                <p>400-689-1199</p>
+                                <p>010-8215-2530</p>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <div class="icon-circle">
+                                <img src="./images/mail.svg" alt="Mail Icon" />
+                            </div>
+                            <div class="info-text">
+                                <p class="title">MAIL</p>
+                                <p>bsupport@xuetangx.com</p>
+                                <p>creditcourse@xuetangx.com</p>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <div class="icon-circle">
+                                <img src="./images/clock.svg" alt="Clock Icon" />
+                            </div>
+                            <div class="info-text">
+                                <p class="title">WORK TIME</p>
+                                <p>Weekdays</p>
+                                <p>9:00-18:00</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="border"></div>
+                    <div class="footer-bottom">
+                        <p>Copyright 2013-2024 Beijing ICP Certificate No. 14019655 | &nbsp;
+                            <img src="./images/mini.png" alt="">
+                            &nbsp;Beijing Public Security Certificate No. 11010802033052 | Beijing Muhua Information
+                            Technology Co., Ltd.
+                        </p>
+                    </div>
+                </div>
+            </footer>
+    </div>
+    <script>
+        new Vue({
+            el: '#app',
+            data() {
+                return {
+
+                    selectedStatus: 'All',
+                    selectedSemester: 'All',
+                    popupClass: '',
+                    currentPage: 1,
+                    coursesPerPage: 10,
+                    searchQuery: '',
+                    isPopupVisible: false,
+                    courses: [
+                    {
+        id: 1,
+        title: 'Practical Language',
+        description: 'This course enhances students’ basic humanistic qualities and skills in understanding, expression, and writing.',
+        teacherName: 'Cai Jing',
+        teacherImage: './Courses-images/teacher1.jpeg',
+        views: 3200,
+        enrolled: 1500,
+        hours: 20,
+        credits: 4,
+        image: './Courses-images/course1.jpeg',
+        status: 'Current',
+        semester: '2024-2025 Academic Year Second Semester'
+    },
+    {
+        id: 2,
+        title: 'Introduction to Artificial Intelligence',
+        description: 'A beginner-level course covering foundational AI concepts and applications.',
+        teacherName: 'Wei Mengxia',
+        teacherImage: './Courses-images/teacher2.jpeg',
+        views: 2800,
+        enrolled: 1200,
+        hours: 18,
+        credits: 4,
+        image: './Courses-images/course2.jpg',
+        status: 'Current',
+        semester: '2024-2025 Academic Year Second Semester'
+    },
+    {
+        id: 3,
+        title: 'Operating Systems',
+        description: 'This course introduces students to operating system fundamentals and their architecture.',
+        teacherName: 'Dr. Sadiq',
+        teacherImage: './Courses-images/teacher3.jpeg',
+        views: 4100,
+        enrolled: 1800,
+        hours: 22,
+        credits: 5,
+        image: './Courses-images/course3.jpeg',
+        status: 'Current',
+        semester: '2024-2025 Academic Year First Semester'
+    },
+    {
+        id: 4,
+        title: 'Military Theory',
+        description: 'This course focuses on the historical and theoretical principles of military science.',
+        teacherName: 'Xu Yan',
+        teacherImage: './Courses-images/teacher4.jpeg',
+        views: 3700,
+        enrolled: 1400,
+        hours: 16,
+        credits: 3,
+        image: './Courses-images/course4.jpeg',
+        status: 'Current',
+        semester: '2024-2025 Academic Year First Semester'
+    },
+    {
+        id: 5,
+        title: 'Applied Mathematics',
+        description: 'An in-depth study of advanced mathematical concepts and their real-world applications.',
+        teacherName: 'Waseem Abbas',
+        teacherImage: './Courses-images/teacher5.jpeg',
+        views: 4500,
+        enrolled: 1600,
+        hours: 24,
+        credits: 5,
+        image: './Courses-images/course5.jpg',
+        status: 'Archived',
+        semester: '2023-2024 Academic Year Second Semester'
+    },
+    {
+        id: 6,
+        title: 'Practical Writing',
+        description: 'This course focuses on developing writing skills for practical and professional purposes.',
+        teacherName: 'Cai Jing',
+        teacherImage: './Courses-images/teacher6.jpeg',
+        views: 4500,
+        enrolled: 1600,
+        hours: 14,
+        credits: 3,
+        image: './Courses-images/course6.jpeg',
+        status: 'Archived',
+        semester: '2022-2023 Academic Year First Semester'
+    },
+    {
+        id: 7,
+        title: 'Routing and Switching Equipment Management',
+        description: 'Learn the configuration and management of routing and switching equipment.',
+        teacherName: 'Maam Ayesha',
+        teacherImage: './Courses-images/teacher7.jpeg',
+        views: 4500,
+        enrolled: 1600,
+        hours: 20,
+        credits: 4,
+        image: './Courses-images/course7.jpeg',
+        status: 'Archived',
+        semester: '2019-2020 Academic Year First Semester'
+    },
+    {
+        id: 8,
+        title: 'Font Design',
+        description: 'Explore the art and techniques of designing creative fonts.',
+        teacherName: 'Wang Dandan',
+        teacherImage: './Courses-images/teacher8.jpeg',
+        views: 4500,
+        enrolled: 1600,
+        hours: 16,
+        credits: 3,
+        image: './Courses-images/course8.jpeg',
+        status: 'Archived',
+        semester: '2023-2024 Academic Year Second Semester'
+    },
+    {
+        id: 9,
+        title: 'Windows Operating System Server Management',
+        description: 'Understand the basics of Windows server configuration and management.',
+        teacherName: 'Liu Xingming',
+        teacherImage: './Courses-images/teacher9.jpeg',
+        views: 4500,
+        enrolled: 1600,
+        hours: 18,
+        credits: 4,
+        image: './Courses-images/course9.jpeg',
+        status: 'Archived',
+        semester: '2021-2022 Academic Year Second Semester'
+    },
+    {
+        id: 10,
+        title: 'Virtualization Technology and Applications',
+        description: 'This course covers virtualization concepts and their practical applications.',
+        teacherName: 'Unknown',
+        teacherImage: './Courses-images/teacher10.jpeg',
+        views: 4500,
+        enrolled: 1600,
+        hours: 22,
+        credits: 5,
+        image: './Courses-images/course10.jpeg',
+        status: 'Archived',
+        semester: '2021-2022 Academic Year Second Semester'
+    },
+  
+                        {
+    id: 11,
+    title: 'E-commerce Basics and Practice',
+    description: 'Learn the fundamentals of e-commerce and its implementation.',
+    teacherName: 'Wan Shoufu',
+    teacherImage: './Courses-images/teacher11.jpeg',
+    views: 4500,
+    enrolled: 1600,
+    hours: 18,
+    credits: 3,
+    image: './Courses-images/course11.jpeg',
+    status: 'Upcoming',
+    semester: '2020-2021 Academic Year Second Semester'
+},
+{
+    id: 12,
+    title: 'Corporate Financial Accounting',
+    description: 'Gain insights into corporate financial systems and accounting practices.',
+    teacherName: 'Unknown',
+    teacherImage: './Courses-images/teacher12.jpeg',
+    views: 4300,
+    enrolled: 1500,
+    hours: 20,
+    credits: 4,
+    image: './Courses-images/course12.jpeg',
+    status: 'Current',
+    semester: '2022-2023 Academic Year Second Semester'
+},
+{
+    id: 13,
+    title: 'Python Programming',
+    description: 'An introduction to Python programming, covering basic to intermediate concepts.',
+    teacherName: 'Geng Yu',
+    teacherImage: './Courses-images/teacher13.jpeg',
+    views: 5200,
+    enrolled: 2000,
+    hours: 22,
+    credits: 4,
+    image: './Courses-images/course13.jpeg',
+    status: 'Archived',
+    semester: '2021-2022 Academic Year First Semester'
+},
+{
+    id: 14,
+    title: 'Interesting Psychological Measurement',
+    description: 'Explore various psychological tests and their practical applications.',
+    teacherName: 'Zhu Wenming',
+    teacherImage: './Courses-images/teacher14.jpeg',
+    views: 3900,
+    enrolled: 1400,
+    hours: 16,
+    credits: 3,
+    image: './Courses-images/course14.jpeg',
+    status: 'Upcoming',
+    semester: '2022-2023 Academic Year First Semester'
+},
+{
+    id: 15,
+    title: 'Cloud Platform Configuration and Management',
+    description: 'Learn to configure and manage cloud-based platforms for modern applications.',
+    teacherName: 'Ye Jianfrng',
+    teacherImage: './Courses-images/teacher15.jpeg',
+    views: 4100,
+    enrolled: 1700,
+    hours: 24,
+    credits: 5,
+    image: './Courses-images/course15.jpeg',
+    status: 'Current',
+    semester: '2024-2025 Academic Year Second Semester'
+},
+{
+    id: 16,
+    title: 'Interesting Talk About Chinese Characters',
+    description: 'Dive into the history and cultural significance of Chinese characters.',
+    teacherName: 'Cai Jing',
+    teacherImage: './Courses-images/teacher16.jpeg',
+    views: 3500,
+    enrolled: 1200,
+    hours: 20,
+    credits: 4,
+    image: './Courses-images/course16.jpeg',
+    status: 'Archived',
+    semester: '2023-2024 Academic Year First Semester'
+},
+{
+    id: 17,
+    title: 'Case Study on the Civil Code',
+    description: 'Analyze and understand the applications of civil code through case studies.',
+    teacherName: 'Unknown',
+    teacherImage: './Courses-images/teacher17.jpeg',
+    views: 3000,
+    enrolled: 1000,
+    hours: 18,
+    credits: 4,
+    image: './Courses-images/course17.jpeg',
+    status: 'Upcoming',
+    semester: '2024-2025 Academic First Second Semester'
+},
+{
+    id: 18,
+    title: 'Microfilm Production and Appreciation',
+    description: 'Learn to create and analyze microfilms for artistic and storytelling purposes.',
+    teacherName: 'Yu Lifeng',
+    teacherImage: './Courses-images/teacher18.jpeg',
+    views: 4400,
+    enrolled: 1600,
+    hours: 22,
+    credits: 5,
+    image: './Courses-images/course18.jpeg',
+    status: 'Current',
+    semester: '2019-2020 Academic Year Second Semester'
+},
+{
+    id: 19,
+    title: 'Artificial Intelligence Basics',
+    description: 'A foundational course on AI principles and their real-world applications.',
+    teacherName: 'Geng Yu',
+    teacherImage: './Courses-images/teacher19.jpeg',
+    views: 5000,
+    enrolled: 1900,
+    hours: 24,
+    credits: 4,
+    image: './Courses-images/course19.jpeg',
+    status: 'Archived',
+    semester: '2020-2021 Academic Year First Semester'
+},
+{
+    id: 20,
+    title: 'Procurement and Supplier Management',
+    description: 'Learn about procurement processes and supplier management in business.',
+    teacherName: 'Zhang Xiaodan',
+    teacherImage: './Courses-images/teacher20.jpeg',
+    views: 4200,
+    enrolled: 1800,
+    hours: 20,
+    credits: 4,
+    image: './Courses-images/course20.jpeg',
+    status: 'Current',
+    semester: '2020-2021 Academic Year Second Semester'
+},
+{
+    id: 21,
+    title: 'Psychological Effects in the Workplace',
+    description: 'Understand the psychological effects in workplace environments.',
+    teacherName: 'Zhu Wenming',
+    teacherImage: './Courses-images/teacher21.jpg',
+    views: 3800,
+    enrolled: 1300,
+    hours: 22,
+    credits: 5,
+    image: './Courses-images/course21.jpg',
+    status: 'Archived',
+    semester: '2023-2024 Academic Year Second Semester'
+},
+{
+    id: 22,
+    title: 'Fun PS',
+    description: 'Learn fun and creative photo editing techniques using Photoshop.',
+    teacherName: 'Unknown',
+    teacherImage: './Courses-images/teacher22.jpg',
+    views: 4200,
+    enrolled: 1500,
+    hours: 18,
+    credits: 3,
+    image: './Courses-images/course22.jpg',
+    status: 'Upcoming',
+    semester: '2024-2025 Academic Year Second Semester'
+},
+{
+    id: 23,
+    title: 'Practical Legal Knowledge and Its Application for College Students',
+    description: 'Learn practical legal knowledge for everyday use by college students.',
+    teacherName: 'Gao Jun',
+    teacherImage: './Courses-images/teacher23.jpg',
+    views: 3400,
+    enrolled: 1200,
+    hours: 16,
+    credits: 3,
+    image: './Courses-images/course23.jpeg',
+    status: 'Current',
+    semester: '2022-2023 Academic Year Second Semester'
+},
+{
+    id: 24,
+    title: 'Computer English',
+    description: 'Improve your computer-related English terminology and communication skills.',
+    teacherName: 'Liu Yong',
+    teacherImage: './Courses-images/teacher24.jpg',
+    views: 4500,
+    enrolled: 1700,
+    hours: 20,
+    credits: 4,
+    image: './Courses-images/course24.jpg',
+    status: 'Archived',
+    semester: '2023-2024 Academic Year First Semester'
+},
+{
+    id: 25,
+    title: 'International Marketing',
+    description: 'Study marketing strategies applied in the global business environment.',
+    teacherName: 'Unknown',
+    teacherImage: './Courses-images/teacher25.jpg',
+    views: 4700,
+    enrolled: 1800,
+    hours: 24,
+    credits: 5,
+    image: './Courses-images/course25.jpg',
+    status: 'Current',
+    semester: '2022-2023 Academic Year First Semester'
+},
+{
+    id: 26,
+    title: 'Linux Operating System Server Management',
+    description: 'Learn how to manage and configure Linux server systems.',
+    teacherName: 'Qin Wen',
+    teacherImage: './Courses-images/teacher26.jpg',
+    views: 4200,
+    enrolled: 1600,
+    hours: 20,
+    credits: 4,
+    image: './Courses-images/course26.jpg',
+    status: 'Archived',
+    semester: '2020-2021 Academic Year Second Semester'
+},
+{
+    id: 27,
+    title: 'Java Advanced Programming',
+    description: 'Advanced concepts in Java programming for seasoned developers.',
+    teacherName: 'Tan Guorong',
+    teacherImage: './Courses-images/teacher27.jpg',
+    views: 4400,
+    enrolled: 1700,
+    hours: 22,
+    credits: 5,
+    image: './Courses-images/course27.jpg',
+    status: 'Upcoming',
+    semester: '2020-2021 Academic Year Second Semester'
+},
+{
+    id: 28,
+    title: 'The Process of Sinicization of Marxism and the Mission and Responsibility of Young Students',
+    description: 'Understand the historical process of Marxism’s integration with Chinese culture.',
+    teacherName: 'Chen Huiqun',
+    teacherImage: './Courses-images/teacher28.jpg',
+    views: 4100,
+    enrolled: 1500,
+    hours: 16,
+    credits: 3,
+    image: './Courses-images/course28.jpg',
+    status: 'Current',
+    semester: '2020-2021 Academic Year First Semester'
+},
+{
+    id: 29,
+    title: 'Entrepreneurial Spirit and Innovative Thinking',
+    description: 'Cultivate entrepreneurial mindset and innovative problem-solving techniques.',
+    teacherName: 'Unknown',
+    teacherImage: './Courses-images/teacher29.jpg',
+    views: 4300,
+    enrolled: 1600,
+    hours: 24,
+    credits: 5,
+    image: './Courses-images/course29.jpg',
+    status: 'Archived',
+    semester: '2019-2020 Academic Year Second Semester'
+},
+{
+    id: 30,
+    title: 'Interpretation Practice I',
+    description: 'Practice interpretation skills for real-world language translation scenarios.',
+    teacherName: 'Jin Zhibo',
+    teacherImage: './Courses-images/teacher30.jpg',
+    views: 4600,
+    enrolled: 1800,
+    hours: 28,
+    credits: 6,
+    image: './Courses-images/course30.jpg',
+    status: 'Current',
+    semester: '2019-2020 Academic Year Second Semester'
+}
+
+
+                    ]
+                };
+            },
+            computed: {
+                totalPages() {
+                    return 3; // Explicitly set the total number of pages
+                },
+                filteredCourses() {
+                    // Filter courses based on status, semester, and search query
+                    return this.courses.filter(course => {
+                        const matchesStatus = this.selectedStatus === 'All' || course.status === this.selectedStatus;
+                        const matchesSemester = this.selectedSemester === 'All' || course.semester === this.selectedSemester;
+                        const matchesSearchQuery = course.title.toLowerCase().includes(this.searchQuery.toLowerCase());
+                        return matchesStatus && matchesSemester && matchesSearchQuery;
+                    });
+                },
+                paginatedCourses() {
+                    // Apply pagination on filtered courses
+                    const start = (this.currentPage - 1) * this.coursesPerPage;
+                    const end = start + this.coursesPerPage;
+                    return this.filteredCourses.slice(start, end);
+                },
+
+            },
+            methods: {
+
+                goToPage(page) {
+                    this.currentPage = page;
+                },
+                goToPreviousPage() {
+                    if (this.currentPage > 1) {
+                        this.currentPage -= 1;
+                    }
+                },
+                goToNextPage() {
+                    if (this.currentPage < this.totalPages) {
+                        this.currentPage += 1;
+                    }
+                },
+                selectStatus(status) {
+                    this.selectedStatus = status;
+                },
+                selectSemester(semester) {
+                    this.selectedSemester = semester;
+                },
+                openPopup() {
+                    this.isPopupVisible = true;
+                },
+                closePopup() {
+                    this.isPopupVisible = false;
+                },
+                searchCourses() {
+                    // Trigger recomputation of `filteredCourses`
+                }
+            }
+        });
+    </script>
+
+</body>
+
+</html>
